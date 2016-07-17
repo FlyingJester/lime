@@ -15,5 +15,5 @@ export TARGETBITS=32
 
 export XCCFLAGS=-Os -ffreestanding -Wall -Wextra -ansi -pedantic -Werror -m$(TARGETBITS) -I$(PDIR)/klime
 export XLINKFLAGS=-nostdlib -nostdinc -m$(EXEFORMAT)_$(ARCHTARGET)
-export XASFLAGS=-f$(EXEFORMAT)$(TARGETBITS)
+export XASFLAGS=-f$(EXEFORMAT)$(TARGETBITS) -Worphan-labels
 export XCXXFLAGS=$(XCCFLAGS) -fno-exceptions -fno-rtti -std=c++98

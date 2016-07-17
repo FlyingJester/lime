@@ -18,9 +18,6 @@ section .text
 
 extern KLime_timerInterruptHandler
 
-global KLime_setupInterrupts
-global KLime_Debug_getInterruptTableLocation
-
 align 4
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -46,6 +43,16 @@ KLime_exceceptionHandler %+ i:
     ; right thing to do, but it prevents jumps to wild memory.
     cmp eax, 0
     je exception_ %+ i %+ _failed
+
+    ; If there is already an error code, we can simply call the handler.
+    ; Otherwise, we must push a dummy value onto the stack to keep things
+    ; aligned properly.
+    ; if (!((i > 8 && i < 14) || i == 17 || i = 30)) push 0
+
+%if (i < 8 || ( i > 14 && i <> 17 && 1 <> 30))
+    push 0
+%endif
+
     call [eax]
 exception_ %+ i %+ _failed:
     Lime_M_isrEpilogue
@@ -55,11 +62,11 @@ exception_ %+ i %+ _failed:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interrupt descriptor definition
     struc   intr_desc
-offset_1    resb 2 ; offset bits (unused?)
+offset_1    resb 2 ; offset bits 0-15
 selector    resb 2 ; Code segment selector in GDT or IDT
 unused_     resb 1 ; Definitely unused, for some reason.
 attr        resb 1 ; Attributes
-offset_2    resb 2 ; more offsets.
+offset_2    resb 2 ; offset bits 16-31
     endstruc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -135,6 +142,10 @@ offset_2    resb 2 ; more offsets.
 ; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+global KLime_setExceptionHandler
+global KLime_setupInterrupts
+global KLime_Debug_getInterruptTableLocation
+
 KLime_setExceptionHandler: 
 
     ; Arguments: KLime_InterruptHandler handler, KLime_ExceptionType
@@ -156,9 +167,7 @@ KLime_setExceptionHandler:
     cmp edx, 9
     je set_exc_bad
 
-set_exc_ok
-
-
+set_exc_ok:
     mov eax, 1
     ret
 
@@ -175,13 +184,16 @@ KLime_setupInterrupts:
     mov [esp-4], dword idt_start
 
     lidt [esp-6]
-    add esp,6
     ; Restore the stack after the IDT setup
+    add esp,6
 
-    ; Set up the dummy exception handlers.
+    ; Setup the exception handlers for the first 32 interrupts in the table
     %assign i 0
     %rep 32
-        mov dword [cside_exception_calls + (i*4)], 0
+    
+    mov eax,dword [cside_exception_calls + (i*4)]
+    mov 
+
     %assign i i+1
     %endrep
 

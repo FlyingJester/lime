@@ -51,14 +51,22 @@ void KLime_main(){
     KLime_VGA_terminalNewLine(&term);
     KLime_VGA_terminalPutStringWordWrap(&term, license_text2);
 
-    KLime_VGA_terminalNewLine(&term);
-    print_address(term, 0x9684, "0x9684");
-    // Just a test, let's see what address the IDT table ended up as!
-    print_address(term, KLime_Debug_getInterruptTableLocation(), "IDT");
-    print_address(term, KLime_Debug_getInterruptTableLocation, "IDT debug call location");
-    print_address(term, &term, "stack");
-    print_address(term, KLime_main, "main function");
 
-    
+    for(unsigned i = 0; i < 32; i++){
+        if(i%8 == 0)
+            KLime_VGA_terminalNewLine(&term);
+        
+        const char *const value = KLime_setExceptionHandler((KLime_InterruptHandler)0, (KLime_ExceptionType)i) ? "Y" : "N";
+        char buffer[8];
+        KLime_intToString(i, buffer, 10);
+        if(buffer[1] == '\0'){
+            buffer[1] = ' ';
+            buffer[2] = '\0';
+        }
+        KLime_VGA_terminalPutStringWordWrap(&term, buffer);
+        KLime_VGA_terminalPutStringWordWrap(&term, ": (");
+        KLime_VGA_terminalPutStringWordWrap(&term, value);
+        KLime_VGA_terminalPutStringWordWrap(&term, ") ");
+    }
 
 }

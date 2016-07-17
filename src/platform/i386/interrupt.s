@@ -187,16 +187,6 @@ KLime_setupInterrupts:
     ; Restore the stack after the IDT setup
     add esp,6
 
-    ; Setup the exception handlers for the first 32 interrupts in the table
-    %assign i 0
-    %rep 32
-    
-    mov eax,dword [cside_exception_calls + (i*4)]
-    mov 
-
-    %assign i i+1
-    %endrep
-
     ret
 
 KLime_Debug_getInterruptTableLocation:

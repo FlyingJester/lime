@@ -20,14 +20,15 @@
 bool KLime_setGlobalDescriptor(void *destination, const struct KLime_DescriptorEntry *entry){
     /* Some limits cannot be encoded. */
     uint32_t length = entry->m_length;
-    uint8_t *out = destination;
-    const uint8_t *const base = &entry->m_base_address, *const limit = &length;
+    uint8_t *out = (uint8_t *)destination;
+    const uint8_t *const base = (const uint8_t *)&entry->m_base_address,
+        *const limit = (const uint8_t *)&length;
 
     if(length > 0x10000 && (length & 0xFFF) != 0xFFF){
         return false;
     }
     if(length > 0x10000){
-        limit >>= 12;
+        length >>= 12;
         out[6] = 0xC0;
     }
     else

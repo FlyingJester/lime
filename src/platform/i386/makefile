@@ -4,10 +4,10 @@ all: libklimearch.a kernel.ld
 	install -C libklimearch.a $(BUILDDIR)
 	install -C kernel.ld $(BUILDDIR)
 
-ARCHLIBS=bootstub.o thread.o syscall.o interrupt.o
+ARCHOBJS=bootstub.o thread.o syscall.o interrupt.o descriptor.o
 
-libklimearch.a: $(ARCHLIBS) ${ls | fgrep .s}
-	$(XAR) rvs libklimearch.a $(ARCHLIBS)
+libklimearch.a: $(ARCHOBJS) ${ls | fgrep .s}
+	$(XAR) rvs libklimearch.a $(ARCHOBJS)
 
 clean:
 	rm *.o *.a
